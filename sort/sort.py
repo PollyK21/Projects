@@ -25,12 +25,12 @@ def sort_files(folder_path):
 
 
     # прописать путь к новым папкам в переменных
-    image_folder = os.path.join(folder_path, 'Images')
-    video_folder = os.path.join(folder_path, 'Video')
-    document_folder = os.path.join(folder_path, 'Documents')
-    audio_folder = os.path.join(folder_path, 'Audio')
-    archives_folder = os.path.join(folder_path, 'Archives')
-    other_folder = os.path.join(folder_path, 'Other')
+    image_folder = os.path.join(folder_path, 'images')
+    video_folder = os.path.join(folder_path, 'videos')
+    document_folder = os.path.join(folder_path, 'documents')
+    audio_folder = os.path.join(folder_path, 'audio')
+    archives_folder = os.path.join(folder_path, 'archives')
+    other_folder = os.path.join(folder_path, 'other')
 
     # передираем пути, если нет нужной папки она создаётся
     for folder in [image_folder, video_folder, document_folder, audio_folder, archives_folder, other_folder]:
@@ -56,37 +56,33 @@ def sort_files(folder_path):
                  # сортируем по окончаниям в созданные папки 
                     if file_extension in ('.jpeg', '.png', '.jpg', '.svg'):
                         shutil.move(file_path, os.path.join(image_folder, filename))
-                        image_files.append(filename)
 
                     elif file_extension in ('.avi', '.mp4', '.mov', '.mkv'):
                         shutil.move(file_path, os.path.join(video_folder, filename))
-                        video_files.append(filename)
 
                     elif file_extension in ('.doc', '.docx', '.txt', '.pdf', '.xlsx', '.pptx'):
                         shutil.move(file_path, os.path.join(document_folder, filename))
-                        document_files.append(filename)
 
                     elif file_extension in ('.mp3', '.ogg', '.wav', '.amr'):
                         shutil.move(file_path, os.path.join(audio_folder, filename))
-                        audio_files.append(filename)
 
                     elif file_extension in ('.zip', '.gz', '.tar'):
                         # архив распаковать в новую папку по названию архива
                         # прописываем полный адрес куда распаковать(адрес папки, название архива(файла) без расширения)
                         archive_folder = os.path.join(archives_folder, os.path.splitext(filename)[0])
-                        shutil.unpack_archive(file_path, archive_folder)
+                        try:
+                            shutil.unpack_archive(file_path, archive_folder)
+                        except shutil.ReadError:
+                            continue
+
                         # переместить архив в папку к архивам
                         shutil.move(file_path, os.path.join(archives_folder, filename))
-                        archive_files.append(filename)
                         
                     else:
                         shutil.move(file_path, os.path.join(other_folder, filename))
-                        other_files.append(filename)
-                        if file_extension:  # Додаємо перевірку на наявність розширення перед додаванням до множини
-                            unknown_extensions.add(file_extension)
 
-                    if file_extension: 
-                        known_extensions.add(file_extension)
+
+
 
                 
     def remove_empty_folders(folder_path):
@@ -131,24 +127,64 @@ def sort_files(folder_path):
                 os.rename(old_file_path, new_file_path)
 
 
+    def stat(folder_path):
+        for (root, dirs, files) in os.walk(folder_path):
+            for filename in files:
+                file_path = os.path.join(root, filename)
+
+                _, file_extension = os.path.splitext(filename)
+                file_extension = file_extension.lower()
+
+                if file_extension in ('.jpeg', '.png', '.jpg', '.svg'):
+                    image_files.append(filename)
+                    if file_extension: 
+                        known_extensions.add(file_extension)
+
+                elif file_extension in ('.avi', '.mp4', '.mov', '.mkv'):
+                    video_files.append(filename)
+                    if file_extension: 
+                        known_extensions.add(file_extension)
+
+                elif file_extension in ('.doc', '.docx', '.txt', '.pdf', '.xlsx', '.pptx'):
+                    document_files.append(filename)
+                    if file_extension: 
+                        known_extensions.add(file_extension)
+
+                elif file_extension in ('.mp3', '.ogg', '.wav', '.amr'):
+                    audio_files.append(filename)
+                    if file_extension: 
+                        known_extensions.add(file_extension)
+
+                elif file_extension in ('.zip', '.gz', '.tar'):
+                    archive_files.append(filename)
+                    if file_extension: 
+                        known_extensions.add(file_extension)
+                        
+                else:
+                    other_files.append(filename)
+                    if file_extension:  # Додаємо перевірку на наявність розширення перед додаванням до множини
+                        unknown_extensions.add(file_extension)
+
+
+
 
     normalize(folder_path)
     walk(folder_path)
     remove_empty_folders(folder_path)
+    stat(folder_path)
 
 
 
     return {
-        'Images': image_files,
-        'Videos': video_files,
-        'Documents': document_files,
-        'Audio': audio_files,
-        'Archives': archive_files,
-        'Other': other_files,
+        'images': image_files,
+        'videos': video_files,
+        'documents': document_files,
+        'audio': audio_files,
+        'archives': archive_files,
+        'other': other_files,
         'KnownExtensions': known_extensions,
         'UnknownExtensions': unknown_extensions
     }
-
 
 #проверяем правильно ли кол во аргументов ввели в консоль 
 if __name__ == "__main__":
