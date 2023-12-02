@@ -1,5 +1,4 @@
 from datetime import date, timedelta, datetime
-import collections
 
 
 def get_birthdays_per_week(users):
