@@ -1,4 +1,4 @@
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 
 
 def get_birthdays_per_week(users):
@@ -9,17 +9,16 @@ def get_birthdays_per_week(users):
     # дата через тиждень
     next_week = date.today() + timedelta(weeks=1)
 
-
     birthdays = {}
 
-    
     for user in users:
         name = user['name']
         birthday = user['birthday']
 
-        # міняємо рік на поточний (якщо рік записний минулий чи дата народження)
+        # міняємо рік на поточний (якщо рік записний минулий чи дата нар)
         new_b = birthday.replace(year=today_year)
-        #якщо при цьому дата др вже минула в цьому році додаємо рік щоб визначити наступний др
+
+        # якщо при цьому дата др вже минула в цьому році додаємо рік
         if today > new_b:
             new_b = new_b.replace(year=today_year + 1)
 
@@ -54,4 +53,3 @@ def get_birthdays_per_week(users):
 # ]
 
 # get_birthdays_per_week(users_list)
-
